@@ -1,17 +1,16 @@
-import asyncio
-import sys
-
-from bot.utils import logger
-from bot.utils.launcher import process
+from bot.utils.json_loader import load_accounts
 
 
 async def main():
-    await process()
+    accounts = load_accounts()
+    if not accounts:
+        logger.error("<red>No accounts loaded. Exiting...</red>")
+        return
 
-
-if __name__ == '__main__':
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        logger.info("<cyan>Bot stopped by user!</cyan>")
-        sys.exit(2)
+    for account in accounts:
+        session_name = account.get("session_name")
+        if session_name:
+            logger.info(f"<green>Starting bot for session: {session_name}</green>")
+            await process(session_name)  # Pass session_name to the process function
+        else:
+            logger.warning("<yellow>Session name missing in accounts.json. Skipping...</yellow>")
